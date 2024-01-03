@@ -17,6 +17,7 @@ def get_data():
 
     return res
 
+# format the data into a list of key-value pairs (dicts)
 def format_data(res):
     data = {}
     location = res['location']
@@ -34,13 +35,20 @@ def format_data(res):
     data['picture'] = res['picture']['medium']
 
     return data
-    
+
+#
 def stream_data():
     import json
+    from kafka import KafkaProducer
+    import time
     
     res = get_data()
     res = format_data(res)
-    print(json.dumps(res, indent=3))
+   # print(json.dumps(res, indent=3))
+    
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+
+    producer.send('users_created', json.dumps(res).encode('utf-8'))
 
 #with DAG('user_automation',
 #         default_args=default_args,

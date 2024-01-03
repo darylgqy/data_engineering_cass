@@ -2,23 +2,22 @@ version: '3'
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
-    hostname: zookeeper
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    healthcheck:
-      test: ['CMD', 'bash', '-c', "echo 'ruok' | nc localhost 2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - confluent
+      image: confluentinc/cp-zookeeper:7.4.0
+      hostname: zookeeper
+      container_name: zookeeper
+      ports:
+        - "2181:2181"
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
+      healthcheck:
+        test: ['CMD', 'bash', '-c', "echo 'ruok' | nc localhost 2181"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      networks:
+        - confluent
 
-  
   broker:
     image: confluentinc/cp-server:7.4.0
     hostname: broker
@@ -76,7 +75,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-  
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.4.0
     hostname: control-center
@@ -86,17 +84,25 @@ services:
         condition: service_healthy
       schema-registry:
         condition: service_healthy
+    ports:
+      - "9021:9021"
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
-      CONTROL_CENTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-      CONFLUENT_METRICS_ENABLE: 'false'
+      CONFLIENT_METRICS_ENABLE: 'false'
       PORT: 9021
     networks:
       - confluent
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9021/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 
 networks:
   confluent:
