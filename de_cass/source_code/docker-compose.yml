@@ -106,20 +106,21 @@ services:
   webserver:
     image: apache/airflow:2.6.0-python3.9
     command: webserver
-    entrypoint: []
+    entrypoint: ['opt/airflow/scripts/entrypoint.sh']
     depends_on:
       - postgres
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
-      - AIRFLOW_DATABASE_SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_my_secret_key
     logging:
       options:
         max-size: 10m
         max-file: "3"
-    volumes:
+    volumes: #startup volumes for webserver
     - ./dags:/opt/airflow/dags
+    - ./scripts/entrypoint.sh:/opt/airflow/scripts/entrypoint.sh
     ports:
       - "8080:8080"
     healthcheck:
